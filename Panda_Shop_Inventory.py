@@ -113,7 +113,7 @@ def buy_prompt():
         try:
             choose=input("Buy? y/n or (R)emove ")
             if  choose== "y":
-                print(f"Budget: {gold_pouch}")
+                print(f"Budget: {gold_pouch:.2f}")
                 item_index, quantity = input("input index and quantity: ").split()
                 selected_item = inventory.loc[int(item_index)]
                 selected_quantity = int(quantity)
@@ -121,14 +121,14 @@ def buy_prompt():
                 print(f"Selected item: {selected_item['item']}")
                 print(f"Quantity: {selected_quantity}")
                 print(f"Price: {selected_price}")
-                print(f"Budget: {gold_pouch}")
+                print(f"Budget: {gold_pouch:.2f}")
                 if input("Are you sure? y/n ") == "y":
                     buy_item(selected_item, selected_quantity, selected_price)
             elif choose== "r":
                 remove_item()            
-            else:
+            elif choose=="n":
                 print(shopping_cart)
-                print(f"Budget: {gold_pouch}")
+                print(f"Budget: {gold_pouch:.2f}")
                 while True:
                     answer = input("Continue shopping? y/n ")
                     if answer == "y":
@@ -136,11 +136,14 @@ def buy_prompt():
                         break
                     elif answer == "n":
                         print(shopping_cart)
-                        print(f"Budget: {gold_pouch}")
-                        break
+                        print(f"Budget: {gold_pouch:.2f}")
+                        exit()
                     else:
                         print("Invalid input. Please choose a valid option.")
                         continue
+            else:
+                print("Invalid input. Please choose a valid option.")
+                continue
         except (ValueError, IndexError):
             print("Invalid input. Please choose a valid option.")
             continue
@@ -153,8 +156,12 @@ def buy_item(selected_item, selected_quantity, selected_price):
             print("Purchase cancelled. Insufficient gold.")
             print(f"Gold in pouch: {gold_pouch}")
             return
+        if selected_item["item"] in shopping_cart:
+            shopping_cart[selected_item["item"]]["quantity"] += selected_quantity
+            shopping_cart[selected_item["item"]]["Cost"] += selected_price
+        else:
+            shopping_cart[selected_item["item"]] = {"quantity": selected_quantity, "Cost": selected_price}
         inventory.at[selected_item.name, "Stock"] -= selected_quantity
-        shopping_cart[selected_item["item"]] = {"quantity": selected_quantity, "Cost": (selected_price)}
         gold_pouch -= float(round(selected_price, 2))
         print(f"Bought {selected_quantity} {selected_item['item']} for {selected_price} gold.")
     else:
